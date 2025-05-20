@@ -592,6 +592,7 @@ def get_vllm_version() -> str:
     else:
         raise RuntimeError("Unknown runtime environment")
 
+    print(f"==========={version}==========")
     return version
 
 
@@ -687,7 +688,7 @@ else:
 
 setup(
     # static metadata should rather go in pyproject.toml
-    version=get_vllm_version(),
+    version=get_version(),
     ext_modules=ext_modules,
     install_requires=get_requirements(),
     extras_require={
