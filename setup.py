@@ -548,7 +548,7 @@ def get_gaudi_sw_version():
 
 
 def get_vllm_version() -> str:
-    version = get_version(write_to="vllm/_version.py")
+    version = get_version(write_to="vllm/_version.py")    
     sep = "+" if "+" not in version else "."  # dev versions might contain +
 
     if _no_device():
@@ -582,7 +582,7 @@ def get_vllm_version() -> str:
             gaudi_sw_version = gaudi_sw_version.replace(".", "")[:3]
             version += f"{sep}gaudi{gaudi_sw_version}"
     elif _is_tpu():
-        version += f"{sep}tpu"
+        pass        
     elif _is_cpu():
         if envs.VLLM_TARGET_DEVICE == "cpu":
             version += f"{sep}cpu"
