@@ -13,7 +13,7 @@ from shutil import which
 import regex as re
 import torch
 from packaging.version import Version, parse
-from setuptools import Extension, setup
+from setuptools import Extension, setup, find_packages
 from setuptools.command.build_ext import build_ext
 from setuptools_scm import get_version
 from torch.utils.cpp_extension import CUDA_HOME, ROCM_HOME
@@ -673,6 +673,11 @@ package_data = {
     ]
 }
 
+def get_distribution_name():
+    if _is_tpu():
+        return "vllm-tpu"
+    return "vllm"
+
 if _no_device():
     ext_modules = []
 
@@ -684,10 +689,20 @@ else:
         repackage_wheel if envs.VLLM_USE_PRECOMPILED else cmake_build_ext
     }
 
+print(f"get_distribution_name()={get_distribution_name()}")
+print(f"get_vllm_version()={get_vllm_version()}")
 setup(
     # static metadata should rather go in pyproject.toml
+    name=get_distribution_name(),
     version=get_vllm_version(),
+    python_requires=">=3.9,<3.13",
+    description="A high-throughput and memory-efficient inference and serving engine for LLMs",
+    long_description=open("README.md", encoding="utf-8").read(),
+    license="Apache-2.0",
+    author="vLLM Team",
+    license_files=["LICENSE"],
     ext_modules=ext_modules,
+    include_package_data=True,
     install_requires=get_requirements(),
     extras_require={
         "tensorizer": ["tensorizer>=2.9.0"],
@@ -696,6 +711,32 @@ setup(
         "audio": ["librosa", "soundfile"],  # Required for audio processing
         "video": []  # Kept for backwards compatibility
     },
+    classifiers = [
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Information Technology",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: Artificial Intelligence",
+        "Topic :: Scientific/Engineering :: Information Analysis",
+    ],
+    project_urls={
+        "Homepage": "https://github.com/vllm-project/vllm",
+        "Documentation": "https://docs.vllm.ai/en/latest/",
+        "Slack": "https://slack.vllm.ai/",
+    },
     cmdclass=cmdclass,
     package_data=package_data,
+    entry_points={
+        "console_scripts": [
+            "vllm = vllm.entrypoints.cli.main:main",
+        ],
+        "vllm.general_plugins": [ # This is your custom entry point group
+            "lora_filesystem_resolver = vllm.plugins.lora_resolvers.filesystem_resolver:register_filesystem_resolver",
+        ],
+    },
+    packages=find_packages(include=["vllm*", "vllm"]),
+
 )
