@@ -548,7 +548,7 @@ def get_gaudi_sw_version():
 
 
 def get_vllm_version() -> str:
-    version = get_version(write_to="vllm/_version.py")    
+    version = get_version(write_to="vllm/_version.py")
     sep = "+" if "+" not in version else "."  # dev versions might contain +
 
     if _no_device():
@@ -689,8 +689,6 @@ else:
         repackage_wheel if envs.VLLM_USE_PRECOMPILED else cmake_build_ext
     }
 
-print(f"get_distribution_name()={get_distribution_name()}")
-print(f"get_vllm_version()={get_vllm_version()}")
 setup(
     # static metadata should rather go in pyproject.toml
     name=get_distribution_name(),
