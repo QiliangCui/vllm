@@ -83,7 +83,7 @@ for pair in "${models[@]}"; do
 
       echo "delete work space $WORKSPACE"
       echo
-      sudo rm -rf $WORKSPACE
+      rm -rf $WORKSPACE
 
       echo "Create workspace..."
       mkdir -p $WORKSPACE    
@@ -103,34 +103,8 @@ for pair in "${models[@]}"; do
       current_hash=$(cat $WORKSPACE/hash.txt)
 
     else      
-      echo "run on docker"
-      echo "deleteing docker $CONTAINER_NAME"
-      echo
-      sudo docker rm -f "$CONTAINER_NAME"
-
-      echo "starting docker...$CONTAINER_NAME"
-      echo    
-      sudo docker run -v $MOUNT_DISK:$DOWNLOAD_DIR --env-file $ENV_FILE -e HF_TOKEN="$HF_SECRETE" -e MODEL=$model_name -e WORKSPACE=/workspace -e VLLM_CODE=/workspace/vllm --name $CONTAINER_NAME -d --privileged --network host -v /dev/shm:/dev/shm $IMAGE_NAME tail -f /dev/null     
-
-      echo "copy script to docker..."
-      echo
-      sudo docker cp "benchmarks/tpu/run_bm.sh" "$CONTAINER_NAME:/workspace/run_bm.sh"
-
-      echo "grant chmod +x"
-      echo
-      sudo docker exec "$CONTAINER_NAME" chmod +x "/workspace/run_bm.sh"    
-
-      echo "run script..."
-      echo
-      sudo docker exec "$CONTAINER_NAME" /bin/bash -c "/workspace/run_bm.sh"
-      
-      echo "copy result back..."
-      VLLM_LOG="$LOG_ROOT/$short_model"_vllm_log.txt
-      BM_LOG="$LOG_ROOT/$short_model"_bm_log.txt
-      TABLE_FILE="$HOME/$short_model"_table.txt
-      sudo docker cp "$CONTAINER_NAME:/workspace/vllm_log.txt" "$VLLM_LOG" 
-      sudo docker cp "$CONTAINER_NAME:/workspace/bm_log.txt" "$BM_LOG"
-      current_hash=$(sudo docker exec $CONTAINER_NAME cat /workspace/hash.txt)      
+      echo "run on docker -- not implemented yet"
+      exit 1
     fi
 
     through_put=$(grep "Request throughput (req/s):" "$BM_LOG" | sed 's/[^0-9.]//g')
@@ -142,29 +116,6 @@ for pair in "${models[@]}"; do
     echo
 done
 
-# echo "try to upload result to spanner"
-# echo
-
-# echo "source $CONDA/bin/activate vllm_spanner"
-# echo
-# source $CONDA/bin/activate vllm_spanner
-
-# echo "pip install google-cloud-spanner"
-# echo 
-# pip install google-cloud-spanner
-
-# echo "install pytz"
-# echo 
-# pip install pytz
-
-# echo "python $HOME/upload_spanner.py $HOME/upload_spanner_state.csv"
-# echo
-# python $HOME/upload_spanner.py $HOME/upload_spanner_state.csv
-
-# echo "gsutil cp $LOG_ROOT/* $REMOTE_LOG_ROOT"
-# echo
-# gsutil cp $LOG_ROOT/* $REMOTE_LOG_ROOT
-
 echo "delete unused docker images"
 echo "sudo docker image prune -f"
-sudo docker image prune -f
+
