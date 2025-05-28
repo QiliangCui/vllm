@@ -3,7 +3,7 @@
 TIMEZONE="America/Los_Angeles"
 TAG="$(TZ="$TIMEZONE" date +%Y%m%d_%H%M%S)"
 
-RESULT="$HOME/result.txt"
+RESULT="/tmp/result.txt"
 
 if [ ! -f "$1" ]; then
   echo "Error: The env file '$1' does not exist."
@@ -18,10 +18,10 @@ set -a
 source $ENV_FILE
 set +a
 
-export VLLM_CODE="$HOME/vllm"
+export VLLM_CODE="./vllm"
 
-mkdir -p "$HOME/log/$TAG"
-LOG_ROOT="$HOME/log/$TAG"
+mkdir -p "/tmp/log/$TAG"
+LOG_ROOT="/tmp/log/$TAG"
 REMOTE_LOG_ROOT="gs://$GCS_BUCKET/$HOSTNAME/log/$TAG"
 
 echo "time:$TAG" >> "$RESULT"
@@ -79,7 +79,7 @@ for pair in "${models[@]}"; do
 
     if [ "$LOCAL_RUN" -eq 1 ]; then    
       echo "run on local vm."
-      export WORKSPACE="$HOME/workspace"
+      export WORKSPACE="/tmp/workspace"
 
       echo "delete work space $WORKSPACE"
       echo
@@ -97,7 +97,7 @@ for pair in "${models[@]}"; do
       echo "copy result back..."
       VLLM_LOG="$LOG_ROOT/$short_model"_vllm_log.txt
       BM_LOG="$LOG_ROOT/$short_model"_bm_log.txt
-      TABLE_FILE="$HOME/$short_model"_table.txt
+      TABLE_FILE="/tmp/$short_model"_table.txt
       cp "$WORKSPACE/vllm_log.txt" "$VLLM_LOG" 
       cp "$WORKSPACE/bm_log.txt" "$BM_LOG"      
       current_hash=$(cat $WORKSPACE/hash.txt)
