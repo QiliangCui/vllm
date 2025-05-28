@@ -18,7 +18,7 @@ set -a
 source $ENV_FILE
 set +a
 
-export VLLM_CODE="./vllm"
+export VLLM_CODE="."
 
 mkdir -p "/tmp/log/$TAG"
 LOG_ROOT="/tmp/log/$TAG"
@@ -96,7 +96,8 @@ for pair in "${models[@]}"; do
       echo "Create workspace..."
       mkdir -p $WORKSPACE    
 
-      source $CONDA/bin/activate vllm      
+      echo "source $CONDA/bin/activate vllm"
+      source $CONDA/bin/activate vllm
       echo "run script..."
       echo
       MODEL=$model_name HF_TOKEN=$HF_SECRETE benchmarks/tpu/run_bm.sh
