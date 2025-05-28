@@ -696,6 +696,7 @@ setup(
     python_requires=">=3.9,<3.13",
     description="A high-throughput and memory-efficient inference and serving engine for LLMs",
     long_description=open("README.md", encoding="utf-8").read(),
+    long_description_content_type="text/markdown",
     license="Apache-2.0",
     author="vLLM Team",
     license_files=["LICENSE"],
