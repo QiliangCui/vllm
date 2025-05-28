@@ -48,6 +48,14 @@ else
   exit 1
 fi
 
+# Check if the environment "vllm" does NOT exist
+if ! $CONDA/bin/conda info --envs | grep -qE "^\s*vllm\s"; then
+    echo "Environment 'vllm' does not exist. Creating..."
+    $CONDA/bin/conda create -y -n vllm python=3.11
+else
+    echo "Environment 'vllm' already exists. Skipping creation."
+fi
+
 echo "running tag $TAG"
 echo "result file $RESULT"
 echo
