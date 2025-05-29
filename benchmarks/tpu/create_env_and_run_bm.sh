@@ -39,9 +39,7 @@ if [ ! -d "$MOUNT_DISK" ]; then
     exit 1
 fi
 
-if [ -d "$HOME/miniconda3" ]; then
-  CONDA="$HOME/miniconda3"
-elif [ -d "/opt/conda" ]; then
+if [ -d "/opt/conda" ]; then
   CONDA="/opt/conda"
 else
   echo "Error: Conda installation not found." >&2
@@ -60,71 +58,12 @@ echo "running tag $TAG"
 echo "result file $RESULT"
 echo
 
-if [ "$LOCAL_RUN" != "1" ]; then
-  echo "docker pull $IMAGE_NAME"
-  echo
-  sudo docker pull $IMAGE_NAME
-fi
+echo "source $CONDA/bin/activate vllm"
+source $CONDA/bin/activate vllm
+echo "run script..."
 
+# WARNING:root:libtpu.so and TPU device found. Setting PJRT_DEVICE=TPU.
+echo "PWD $PWD"
 
-
-sleep 1
-
-IFS=';' read -ra models <<< "$MODELS"
-
-table_results=""
-
-# Loop through each pair and print it
-for pair in "${models[@]}"; do
-    # trim leading/trailing spaces
-    pair=$(echo "$pair" | xargs)
-    echo "iteration: $pair"  
-    short_model=$(echo "$pair" | cut -d' ' -f1)
-    model_name=$(echo "$pair" | cut -d' ' -f2-)
-
-    echo "===== run model $model_name... ===="
-    echo
-
-    if [ "$LOCAL_RUN" -eq 1 ]; then    
-      echo "run on local vm."
-      export WORKSPACE="/tmp/workspace"
-
-      echo "delete work space $WORKSPACE"
-      echo
-      rm -rf $WORKSPACE
-
-      echo "Create workspace..."
-      mkdir -p $WORKSPACE    
-
-      echo "source $CONDA/bin/activate vllm"
-      source $CONDA/bin/activate vllm
-      echo "run script..."
-      echo
-      MODEL=$model_name HF_TOKEN=$HF_SECRETE benchmarks/tpu/run_bm.sh
-      conda deactivate
-
-      echo "copy result back..."
-      VLLM_LOG="$LOG_ROOT/$short_model"_vllm_log.txt
-      BM_LOG="$LOG_ROOT/$short_model"_bm_log.txt
-      TABLE_FILE="/tmp/$short_model"_table.txt
-      cp "$WORKSPACE/vllm_log.txt" "$VLLM_LOG" 
-      cp "$WORKSPACE/bm_log.txt" "$BM_LOG"      
-      current_hash=$(cat $WORKSPACE/hash.txt)
-
-    else      
-      echo "run on docker -- not implemented yet"
-      exit 1
-    fi
-
-    through_put=$(grep "Request throughput (req/s):" "$BM_LOG" | sed 's/[^0-9.]//g')
-    echo "through put for $short_model: $through_put"
-    echo "through put for $short_model: $through_put" >> "$RESULT"    
-    if [ -n "$current_hash" ]; then
-      echo "$TAG,$current_hash,$through_put" >> "$TABLE_FILE"
-    fi    
-    echo
-done
-
-echo "delete unused docker images"
-echo "sudo docker image prune -f"
-
+echo "run the python script"
+python -c "import torch_xla.core.xla_model as xm; print(xm.xla_device())"
