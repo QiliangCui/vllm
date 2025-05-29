@@ -14,6 +14,8 @@ fi
 
 ENV_FILE=$1
 
+source /etc/environment
+
 set -a
 source $ENV_FILE
 set +a
