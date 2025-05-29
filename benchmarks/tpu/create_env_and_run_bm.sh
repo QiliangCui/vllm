@@ -63,6 +63,7 @@ source $CONDA/bin/activate vllm
 echo "run script..."
 
 # WARNING:root:libtpu.so and TPU device found. Setting PJRT_DEVICE=TPU.
+echo "USER $USER"
 echo "PWD $PWD"
 
 echo "run the python script"
