@@ -1,7 +1,8 @@
 steps:
   - label: ":python: Run TPU Benchark v6e-1"    
     command:
-      - "benchmarks/tpu/create_env_and_run_bm.sh benchmarks/tpu/config_v6e_1_local.env"
+      - "DOCKER_BUILDKIT=1 docker build --build-arg max_jobs=16 --build-arg USE_SCCACHE=1 --build-arg GIT_REPO_CHECK=1 --tag vllm/vllm-tpu-bm:$BUILDKITE_COMMIT --progress plain -f docker/Dockerfile.tpu ."
+      - "benchmarks/tpu/docker_run_bm.sh benchmarks/tpu/config_v6e_1.env"
     agents:
       queue: tpu-v6e-1
  

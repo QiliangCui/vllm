@@ -1,14 +1,11 @@
 #!/bin/bash
 
-TAG=""
 VLLM_LOG="$WORKSPACE/vllm_log.txt"
 BM_LOG="$WORKSPACE/bm_log.txt"
-RESULT="$WORKSPACE/result.txt"
 HASH_FILE="$WORKSPACE/hash.txt"
-TABLE_FILE="$WORKSPACE/table.txt"
+RESULT_FILE="$WORKSPACE/table.txt"
 
 echo "running tag $TAG"
-echo "result file$ $RESULT"
 echo "model: $MODEL"
 echo
 
@@ -17,34 +14,8 @@ echo
 #
 mkdir "$WORKSPACE/log"
 
-cd "$VLLM_CODE"
-
-if [ "$SYNC_TO_HEAD" -eq 1 ]; then
-    echo "sync code to latest"
-    echo
-    git checkout main
-    git reset --hard
-    git pull
-else
-    echo "skip sync..."
-fi
-
-echo "pip uninstall -y torch torch_xla jax jaxlib libtpu_nightly"
-echo
-pip uninstall -y torch torch_xla jax jaxlib libtpu_nightly
-
-echo "pip install -r $REQUIREMENTS"
-pip install -r $REQUIREMENTS
-VLLM_TARGET_DEVICE="tpu" python -m pip install --editable .
-
 pip install pandas
 pip install datasets
-
-
-echo "time:$TAG" >> "$RESULT"
-current_hash=$(git rev-parse HEAD)
-echo "hash:$current_hash" >> "$RESULT"
-echo "$current_hash" > $HASH_FILE
 
 #
 # create sonnet_4x
@@ -109,12 +80,10 @@ echo
 
 through_put=$(grep "Request throughput (req/s):" "$BM_LOG" | sed 's/[^0-9.]//g')
 echo "through put: $through_put"
-echo "through put: $through_put" >> "$RESULT"
 echo
 
-echo "$TAG,$current_hash,$through_put" >> "$TABLE_FILE"
+echo "$through_put" >> "$RESULT_FILE"
 
 echo "pkill -f vllm"
 echo
 pkill vllm
-sleep 10
