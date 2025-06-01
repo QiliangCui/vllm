@@ -73,3 +73,17 @@ if [ "$BUILDKITE" = "true" ]; then
 else
   echo "Not running inside Buildkite"
 fi
+
+#
+# compare the through_put with EXPECTED_THROUGHPUT 
+# and assert meeting the expectation
+# 
+if [[ -z "$through_put" || ! "$through_put" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
+  echo "faieled to get the through_put"
+  exit 1
+fi
+
+if (( $(echo "$through_put < $EXPECTED_THROUGHPUT" | bc -l) )); then
+  echo "Error: through_put is less than EXPECTED_THROUGHPUT"
+  exit 1
+fi
