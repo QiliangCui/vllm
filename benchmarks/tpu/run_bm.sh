@@ -5,7 +5,6 @@ BM_LOG="$WORKSPACE/bm_log.txt"
 HASH_FILE="$WORKSPACE/hash.txt"
 RESULT_FILE="$WORKSPACE/table.txt"
 
-echo "running tag $TAG"
 echo "model: $MODEL"
 echo
 
@@ -83,7 +82,3 @@ echo "through put: $through_put"
 echo
 
 echo "$through_put" >> "$RESULT_FILE"
-
-echo "pkill -f vllm"
-echo
-pkill vllm
