@@ -84,6 +84,6 @@ if [[ -z "$through_put" || ! "$through_put" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
 fi
 
 if (( $(echo "$through_put < $EXPECTED_THROUGHPUT" | bc -l) )); then
-  echo "Error: through_put is less than EXPECTED_THROUGHPUT"
+  echo "Error: through_put($through_put) is less than expected($EXPECTED_THROUGHPUT)"
   exit 1
 fi
