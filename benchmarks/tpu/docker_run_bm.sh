@@ -23,7 +23,9 @@ trap remove_docker_container EXIT
 # Remove the container that might not be cleaned up in the previous run.
 remove_docker_container
 
-# Build docker image
+# Build docker image.
+# TODO: build the image outside the script and share the image with other
+# tpu test if building time is too long.
 DOCKER_BUILDKIT=1 docker build \
   --build-arg max_jobs=16 \
   --build-arg USE_SCCACHE=1 \
@@ -51,7 +53,19 @@ echo
 
 echo "starting docker...$CONTAINER_NAME"
 echo    
-docker run -v $DOWNLOAD_DIR:$DOWNLOAD_DIR --env-file $ENV_FILE -e HF_TOKEN="$HF_TOKEN" -e TAGET_COMMIT=$BUILDKITE_COMMIT -e MODEL=$MODEL -e WORKSPACE=/workspace --name $CONTAINER_NAME -d --privileged --network host -v /dev/shm:/dev/shm vllm/vllm-tpu-bm tail -f /dev/null
+docker run \
+ -v $DOWNLOAD_DIR:$DOWNLOAD_DIR \
+ --env-file $ENV_FILE \
+ -e HF_TOKEN="$HF_TOKEN" \
+ -e TAGET_COMMIT=$BUILDKITE_COMMIT \
+ -e MODEL=$MODEL \
+ -e WORKSPACE=/workspace \
+ --name $CONTAINER_NAME \
+ -d \
+ --privileged \
+ --network host \
+ -v /dev/shm:/dev/shm \
+ vllm/vllm-tpu-bm tail -f /dev/null
 
 echo "run script..."
 echo
