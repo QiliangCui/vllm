@@ -1,8 +1,5 @@
 #!/bin/bash
 
-TIMEZONE="America/Los_Angeles"
-TIME_TAG="$(TZ="$TIMEZONE" date +%Y%m%d_%H%M%S)"
-
 if [ ! -f "$1" ]; then
   echo "Error: The env file '$1' does not exist."
   echo "Error: The env file '$1' does not exist." >> $RESULT
@@ -14,13 +11,29 @@ ENV_FILE=$1
 # For testing on local vm, use `set -a` to export all variables
 source /etc/environment
 source $ENV_FILE
-cat $ENV_FILE
-echo "========$CONTAINER_NAME========"
 
-mkdir -p "./log/$TIME_TAG"
-LOG_ROOT="./log/$TIME_TAG"
+remove_docker_container() { 
+    docker rm -f tpu-test || true; 
+    docker rm -f vllm-tpu || true;
+    docker rm -f $CONTAINER_NAME || true;
+}
 
-echo "time:$TIME_TAG"
+trap remove_docker_container EXIT
+
+# Remove the container that might not be cleaned up in the previous run.
+remove_docker_container
+
+# Build docker image
+DOCKER_BUILDKIT=1 docker build \
+  --build-arg max_jobs=16 \
+  --build-arg USE_SCCACHE=1 \
+  --build-arg GIT_REPO_CHECK=0 \
+  --tag vllm/vllm-tpu-bm \
+  --progress plain -f docker/Dockerfile.tpu .
+
+LOG_ROOT=$(mktemp -d)
+# If mktemp fails, set -e will cause the script to exit.
+echo "Results will be stored in: $LOG_ROOT"
 
 if [ -z "$HF_TOKEN" ]; then
   echo "Error: HF_TOKEN is not set or is empty."  
@@ -36,13 +49,9 @@ fi
 echo "Run model $MODEL"
 echo
 
-echo "deleteing docker $CONTAINER_NAME"
-echo
-docker rm -f "$CONTAINER_NAME"
-
 echo "starting docker...$CONTAINER_NAME"
 echo    
-docker run -v $DOWNLOAD_DIR:$DOWNLOAD_DIR --env-file $ENV_FILE -e HF_TOKEN="$HF_TOKEN" -e MODEL=$MODEL -e WORKSPACE=/workspace --name $CONTAINER_NAME -d --privileged --network host -v /dev/shm:/dev/shm vllm/vllm-tpu-bm:$BUILDKITE_COMMIT tail -f /dev/null
+docker run -v $DOWNLOAD_DIR:$DOWNLOAD_DIR --env-file $ENV_FILE -e HF_TOKEN="$HF_TOKEN" -e MODEL=$MODEL -e WORKSPACE=/workspace --name $CONTAINER_NAME -d --privileged --network host -v /dev/shm:/dev/shm vllm/vllm-tpu-bm tail -f /dev/null
 
 echo "run script..."
 echo
@@ -61,10 +70,6 @@ current_hash=$BUILDKITE_COMMIT
 
 through_put=$(grep "Request throughput (req/s):" "$BM_LOG" | sed 's/[^0-9.]//g')
 echo "through put for $TEST_NAME at current_hash: $through_put"
-
-echo "deleteing docker $CONTAINER_NAME"
-echo
-docker rm -f "$CONTAINER_NAME"
 
 if [ "$BUILDKITE" = "true" ]; then
   echo "Running inside Buildkite"
