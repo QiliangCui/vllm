@@ -2,8 +2,6 @@
 
 VLLM_LOG="$WORKSPACE/vllm_log.txt"
 BM_LOG="$WORKSPACE/bm_log.txt"
-HASH_FILE="$WORKSPACE/hash.txt"
-RESULT_FILE="$WORKSPACE/table.txt"
 
 if [ -z "$TAGET_COMMIT" ]; then
   head_hash=$(git rev-parse HEAD)
@@ -21,6 +19,7 @@ echo
 #
 mkdir "$WORKSPACE/log"
 
+# TODO: Move to image building.
 pip install pandas
 pip install datasets
 
@@ -88,5 +87,3 @@ echo
 through_put=$(grep "Request throughput (req/s):" "$BM_LOG" | sed 's/[^0-9.]//g')
 echo "through put: $through_put"
 echo
-
-echo "$through_put" >> "$RESULT_FILE"
