@@ -28,4 +28,10 @@ RUN python3 -m pip install -e .
 # install development dependencies (for testing)
 RUN python3 -m pip install -e tests/vllm_test_utils
 
+# replace the name in pyproject.toml to TPU
+RUN sed -i 's/^name = "vllm"$/name = "vllm-tpu"/' pyproject.toml
+
+# Build the wheel
+RUN python3 setup.py bdist_wheel --dist-dir=dist
+
 CMD ["/bin/bash"]

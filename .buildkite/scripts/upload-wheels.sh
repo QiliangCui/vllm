@@ -16,7 +16,9 @@ wheel="${wheel_files[0]}"
 
 # Rename 'linux' to 'manylinux1' in the wheel filename
 new_wheel="${wheel/linux/manylinux1}"
-mv -- "$wheel" "$new_wheel"
+if [[ "$new_wheel" != "$wheel" ]]; then
+    mv -- "$wheel" "$new_wheel"
+fi
 wheel="$new_wheel"
 
 # Extract the version from the wheel
