@@ -5,6 +5,14 @@ BM_LOG="$WORKSPACE/bm_log.txt"
 HASH_FILE="$WORKSPACE/hash.txt"
 RESULT_FILE="$WORKSPACE/table.txt"
 
+if [ -z "$TAGET_COMMIT" ]; then
+  head_hash=$(git rev-parse HEAD)
+  if [ "$TAGET_COMMIT" != "$head_hash" ]; then
+    echo "Error: target commit $TAGET_COMMIT does not match HEAD: $head_hash"
+    exit 1
+  fi
+fi
+
 echo "model: $MODEL"
 echo
 

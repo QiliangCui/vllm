@@ -51,7 +51,7 @@ echo
 
 echo "starting docker...$CONTAINER_NAME"
 echo    
-docker run -v $DOWNLOAD_DIR:$DOWNLOAD_DIR --env-file $ENV_FILE -e HF_TOKEN="$HF_TOKEN" -e MODEL=$MODEL -e WORKSPACE=/workspace --name $CONTAINER_NAME -d --privileged --network host -v /dev/shm:/dev/shm vllm/vllm-tpu-bm tail -f /dev/null
+docker run -v $DOWNLOAD_DIR:$DOWNLOAD_DIR --env-file $ENV_FILE -e HF_TOKEN="$HF_TOKEN" -e TAGET_COMMIT=$BUILDKITE_COMMIT -e MODEL=$MODEL -e WORKSPACE=/workspace --name $CONTAINER_NAME -d --privileged --network host -v /dev/shm:/dev/shm vllm/vllm-tpu-bm tail -f /dev/null
 
 echo "run script..."
 echo
