@@ -1,8 +1,8 @@
 steps:
   - label: ":python: Run TPU Benchark v6e-1"    
     command:
-      - "benchmarks/tpu/cleanup_docker.sh"
-      - "benchmarks/tpu/docker_run_bm.sh benchmarks/tpu/config_v6e_1.env"      
+      - ".buildkite/scripts/hardware_ci/cleanup_docker.sh"
+      - ".buildkite/scripts/hardware_ci/docker_run_bm.sh .buildkite/scripts/hardware_ci/config_v6e_1.env"      
     agents:
       queue: tpu-v6e-1
  
