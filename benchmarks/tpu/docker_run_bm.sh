@@ -64,12 +64,8 @@ TABLE_FILE="./$TEST_NAME"_table.txt
 docker cp "$CONTAINER_NAME:/workspace/vllm_log.txt" "$VLLM_LOG" 
 docker cp "$CONTAINER_NAME:/workspace/bm_log.txt" "$BM_LOG"
 
-# todo - the code is using current_hash as indicator of if it runs successfully.
-current_hash=$BUILDKITE_COMMIT
-
-
 through_put=$(grep "Request throughput (req/s):" "$BM_LOG" | sed 's/[^0-9.]//g')
-echo "through put for $TEST_NAME at current_hash: $through_put"
+echo "through put for $TEST_NAME at $BUILDKITE_COMMIT: $through_put"
 
 if [ "$BUILDKITE" = "true" ]; then
   echo "Running inside Buildkite"
