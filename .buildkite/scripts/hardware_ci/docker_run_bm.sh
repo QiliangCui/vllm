@@ -62,7 +62,6 @@ docker run \
  --name $CONTAINER_NAME \
  -d \
  --privileged \
- --network host \
  -v /dev/shm:/dev/shm \
  vllm/vllm-tpu-bm tail -f /dev/null
 
