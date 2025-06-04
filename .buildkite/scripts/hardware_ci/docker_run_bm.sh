@@ -63,6 +63,7 @@ docker run \
  -e WORKSPACE=/workspace \
  --name $CONTAINER_NAME \
  -d \
+ ---privileged \
  -v /dev/shm:/dev/shm \
  vllm/vllm-tpu-bm tail -f /dev/null
 
