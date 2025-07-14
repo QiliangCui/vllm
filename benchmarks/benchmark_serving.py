@@ -62,6 +62,7 @@ from benchmark_dataset import (
     BurstGPTDataset,
     ConversationDataset,
     CustomDataset,
+    CustomTokenDataset,
     HuggingFaceDataset,
     InstructCoderDataset,
     MTBenchDataset,
@@ -746,6 +747,12 @@ def main(args: argparse.Namespace):
             skip_chat_template=args.custom_skip_chat_template,
         )
 
+    elif args.dataset_name == "custom-token":
+        dataset = CustomTokenDataset(dataset_path=args.dataset_path)
+        input_requests = dataset.sample(
+            tokenizer=tokenizer, num_requests=args.num_prompts
+        )
+
     elif args.dataset_name == "sonnet":
         dataset = SonnetDataset(dataset_path=args.dataset_path)
         # For the "sonnet" dataset, formatting depends on the backend.
@@ -1024,7 +1031,15 @@ def create_argument_parser():
         "--dataset-name",
         type=str,
         default="sharegpt",
-        choices=["sharegpt", "burstgpt", "sonnet", "random", "hf", "custom"],
+        choices=[
+            "sharegpt",
+            "burstgpt",
+            "sonnet",
+            "random",
+            "hf",
+            "custom",
+            "custom-token",
+        ],
         help="Name of the dataset to benchmark on.",
     )
     parser.add_argument(

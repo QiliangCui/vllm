@@ -369,6 +369,63 @@ class RandomDataset(BenchmarkDataset):
 
 
 # -----------------------------------------------------------------------------
+# Custom Token Dataset Implementation cuiq
+# -----------------------------------------------------------------------------
+
+
+class CustomTokenDataset(BenchmarkDataset):
+    def __init__(
+        self,
+        **kwargs,
+    ) -> None:
+        super().__init__(**kwargs)
+        self.samples = self._load_dataset()
+
+    def _load_dataset(self) -> list[dict]:
+        if self.dataset_path is None:
+            raise ValueError("dataset_path must be provided for loading data.")
+        samples = []
+        with open(self.dataset_path) as f:
+            for line in f:
+                obj = json.loads(line)
+                # Validate expected keys
+                if "input_ids" not in obj or "output_tokens" not in obj:
+                    raise ValueError(
+                        "Each line must contain 'input_ids' and 'output_tokens'."
+                    )
+                samples.append(obj)
+        return samples
+
+    def sample(
+        self,
+        tokenizer: PreTrainedTokenizerBase,
+        num_requests: int,
+        **kwargs,
+    ) -> list[SampleRequest]:
+        requests = []
+        if num_requests > len(self.samples):
+            raise ValueError("not enough samples.")
+        for i in range(min(num_requests, len(self.samples))):
+            token_sequence = self.samples[i]["input_ids"]
+            output_len = self.samples[i]["output_tokens"]
+            prompt = tokenizer.decode(token_sequence)
+            total_input_len = len(token_sequence)
+            re_encoded_sequence = tokenizer.encode(prompt, add_special_tokens=False)[
+                :total_input_len
+            ]
+            prompt = tokenizer.decode(re_encoded_sequence)
+            total_input_len = len(re_encoded_sequence)
+            requests.append(
+                SampleRequest(
+                    prompt=prompt,
+                    prompt_len=total_input_len,
+                    expected_output_len=output_len,
+                )
+            )
+        return requests
+
+
+# -----------------------------------------------------------------------------
 # ShareGPT Dataset Implementation
 # -----------------------------------------------------------------------------
 
