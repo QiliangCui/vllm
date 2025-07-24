@@ -18,6 +18,7 @@ import huggingface_hub.constants
 import numpy as np
 import torch
 from huggingface_hub import HfFileSystem, hf_hub_download, snapshot_download
+from huggingface_hub.utils import logging as hf_logging
 from safetensors.torch import load_file, safe_open, save_file
 from tqdm.auto import tqdm
 
@@ -28,6 +29,8 @@ from vllm.model_executor.layers.quantization import (QuantizationConfig,
                                                      get_quantization_config)
 from vllm.platforms import current_platform
 from vllm.utils import PlaceholderModule
+
+hf_logging.set_verbosity_debug()
 
 try:
     from runai_model_streamer import SafetensorsStreamer
