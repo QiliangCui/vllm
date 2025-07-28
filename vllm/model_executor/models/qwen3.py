@@ -68,6 +68,7 @@ class Qwen3Attention(nn.Module):
                  rope_scaling: Optional[tuple] = None,
                  prefix: str = "",
                  attn_type: str = AttentionType.DECODER) -> None:
+        print("===Qwen3Attention start===")
         super().__init__()
         self.hidden_size = hidden_size
         tp_size = get_tensor_model_parallel_world_size()
@@ -124,6 +125,7 @@ class Qwen3Attention(nn.Module):
                               attn_type=attn_type)
         self.q_norm = RMSNorm(self.head_dim, eps=rms_norm_eps)
         self.k_norm = RMSNorm(self.head_dim, eps=rms_norm_eps)
+        print("===Qwen3Attention end===")
 
     def forward(
         self,
@@ -156,6 +158,7 @@ class Qwen3DecoderLayer(nn.Module):
         quant_config: Optional[QuantizationConfig] = None,
         prefix: str = "",
     ) -> None:
+        print("===Qwen3DecoderLayer start===")
         super().__init__()
         self.hidden_size = config.hidden_size
         # Requires transformers > 4.32.0
@@ -197,6 +200,7 @@ class Qwen3DecoderLayer(nn.Module):
                                        eps=config.rms_norm_eps)
         self.post_attention_layernorm = RMSNorm(config.hidden_size,
                                                 eps=config.rms_norm_eps)
+        print("===Qwen3DecoderLayer end===")
 
     def forward(
         self,
@@ -240,9 +244,11 @@ ALL_DECODER_LAYER_TYPES = {
 class Qwen3Model(Qwen2Model):
 
     def __init__(self, *, vllm_config: VllmConfig, prefix: str = ""):
+        print("===Qwen3Model start===")
         super().__init__(vllm_config=vllm_config,
                          prefix=prefix,
                          decoder_layer_type=Qwen3DecoderLayer)
+        print("===Qwen3Model end===")
 
 
 class Qwen3ForCausalLM(nn.Module, SupportsLoRA, SupportsPP):

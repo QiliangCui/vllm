@@ -67,6 +67,7 @@ class Qwen2MLP(nn.Module):
         quant_config: Optional[QuantizationConfig] = None,
         prefix: str = "",
     ) -> None:
+        print("===Qwen2MLP start===")
         super().__init__()
         self.gate_up_proj = MergedColumnParallelLinear(
             hidden_size,
@@ -86,6 +87,7 @@ class Qwen2MLP(nn.Module):
             raise ValueError(f"Unsupported activation: {hidden_act}. "
                              "Only silu is supported for now.")
         self.act_fn = SiluAndMul()
+        print("===Qwen2MLP end===")
 
     def forward(self, x):
         gate_up, _ = self.gate_up_proj(x)
@@ -278,6 +280,7 @@ class Qwen2Model(nn.Module):
                  vllm_config: VllmConfig,
                  prefix: str = "",
                  decoder_layer_type: type[nn.Module] = Qwen2DecoderLayer):
+        print("===Qwen2Model start===")
         super().__init__()
 
         config = vllm_config.model_config.hf_config
@@ -329,6 +332,7 @@ class Qwen2Model(nn.Module):
             self.norm = RMSNorm(config.hidden_size, eps=config.rms_norm_eps)
         else:
             self.norm = PPMissingLayer()
+        print("===Qwen2Model end===")
 
     def get_input_embeddings(self, input_ids: torch.Tensor) -> torch.Tensor:
         return self.embed_tokens(input_ids)

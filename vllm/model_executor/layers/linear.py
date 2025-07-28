@@ -196,6 +196,11 @@ class UnquantizedLinearMethod(LinearMethodBase):
         set_weight_attrs(weight, {"input_dim": 1, "output_dim": 0})
         layer.register_parameter("weight", weight)
         set_weight_attrs(weight, extra_weight_attrs)
+        print("==== UnquantizedLinearMethod: create_weights called start===")
+        print(f"weight shape: {weight.shape}, ")
+        if weight.shape == torch.Size([1024, 2048]):
+            raise ValueError("who is calling me?")
+        print("==== UnquantizedLinearMethod: create_weights called end===")
 
     def process_weights_after_loading(self, layer: torch.nn.Module) -> None:
         if current_platform.is_cpu() and envs.VLLM_CPU_SGL_KERNEL:
@@ -949,6 +954,11 @@ class QKVParallelLinear(ColumnParallelLinear):
             self.num_kv_heads * self.head_size * tp_size,  # v_proj 
         ]
 
+        print("===QKVParallelLinear start ===")
+        print(f"hidden_size: {hidden_size},"
+              f"head_size: {head_size}, "
+              f"total_num_heads: {total_num_heads}, ")
+        print("===~QKVParallelLinear end ====")
         super().__init__(input_size=input_size,
                          output_size=output_size,
                          bias=bias,

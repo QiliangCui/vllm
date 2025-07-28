@@ -9,7 +9,10 @@ model_name = "Qwen/Qwen3-0.6B"
 sampling_params = SamplingParams(temperature=0.7, top_p=0.9, max_tokens=200)
 
 # Initialize the LLM
-llm = LLM(model=model_name)
+llm = LLM(model=model_name,
+          max_model_len=128,
+          max_num_seqs=32,
+          max_num_batched_tokens=32)
 
 # Prompt to ask
 prompt = "What is the capital of France?"
