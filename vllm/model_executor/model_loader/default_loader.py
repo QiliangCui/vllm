@@ -207,16 +207,21 @@ class DefaultModelLoader(BaseModelLoader):
             )
 
         if current_platform.is_tpu():
-            # In PyTorch XLA, we should call `xm.mark_step` frequently so that
-            # not too many ops are accumulated in the XLA program.
-            import torch_xla.core.xla_model as xm
+            try:
+                from tpu_commons.platforms import (  # noqa: F401
+                    TpuPlatform as TpuCommonsPlatform)
+                pass
+            except ImportError:
+                # In PyTorch XLA, we should call `xm.mark_step` frequently
+                # so that not too many ops are accumulated in the XLA program.
+                import torch_xla.core.xla_model as xm
 
-            def _xla_weights_iterator(iterator: Generator):
-                for weights in iterator:
-                    yield weights
-                    xm.mark_step()
+                def _xla_weights_iterator(iterator: Generator):
+                    for weights in iterator:
+                        yield weights
+                        xm.mark_step()
 
-            weights_iterator = _xla_weights_iterator(weights_iterator)
+                weights_iterator = _xla_weights_iterator(weights_iterator)
 
         if self.counter_before_loading_weights == 0.0:
             self.counter_before_loading_weights = time.perf_counter()
